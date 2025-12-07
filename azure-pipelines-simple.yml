@@ -1,4 +1,5 @@
-# Azure DevOps Pipeline for NPM Package Publishing to Azure Artifacts
+# Azure DevOps Pipeline for NPM Package Publishing to Azure Artifacts (Simplified)
+# This version only publishes to Azure Artifacts - no external dependencies
 
 trigger:
 - main
@@ -9,12 +10,7 @@ pool:
 
 variables:
   # Azure Artifacts feed configuration
-  registryUrl: 'https://pkgs.dev.azure.com/$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_packaging/$(feedName)/npm/registry/'
   feedName: 'npm-packages'  # Replace with your actual feed name
-  
-  # Publishing configuration
-  publishToNpmjs: 'false'  # Set to 'true' to enable publishing to npmjs.com
-  npmjsServiceConnection: 'npmjs-connection'  # Name of your npmjs service connection
 
 stages:
 - stage: Build
@@ -41,12 +37,10 @@ stages:
       displayName: 'Run tests'
       continueOnError: true  # Set to false if you have tests
 
-    - task: Npm@1
-      inputs:
-        command: 'custom'
-        customCommand: 'run build'
-      displayName: 'Build package'
-      continueOnError: true  # Set to false if you have a build script
+    - script: |
+        echo "Package validation completed"
+        npm pack --dry-run
+      displayName: 'Validate package'
 
     # Archive the package contents
     - task: ArchiveFiles@2
@@ -71,7 +65,7 @@ stages:
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
   - deployment: PublishJob
-    displayName: 'Publish NPM Package'
+    displayName: 'Publish NPM Package to Azure Artifacts'
     environment: 'production'
     strategy:
       runOnce:
@@ -111,18 +105,9 @@ stages:
               publishRegistry: 'useFeed'
               publishFeed: '$(System.TeamProject)/$(feedName)'
             displayName: 'Publish to Azure Artifacts'
-
-          # Optional: Publish to public npm registry (requires service connection setup)
-          # To enable this step:
-          # 1. Go to Project Settings → Service Connections
-          # 2. Create new service connection → npm
-          # 3. Name it 'npmjs-connection'
-          # 4. Add your npmjs.com credentials
-          # 5. Set publishToNpmjs variable to 'true' in your pipeline
-          - task: Npm@1
-            inputs:
-              command: 'publish'
-              publishRegistry: 'useExternalRegistry'
-              publishEndpoint: '$(npmjsServiceConnection)'
-            displayName: 'Publish to npmjs.com (Optional)'
-            condition: and(succeeded(), eq(variables['publishToNpmjs'], 'true'), ne(variables['Build.Reason'], 'PullRequest'))
+            
+          - script: |
+              echo "✅ Package published successfully to Azure Artifacts!"
+              echo "Feed: $(feedName)"
+              echo "Package: $(cat package.json | jq -r '.name')@$(cat package.json | jq -r '.version')"
+            displayName: 'Publication Summary'

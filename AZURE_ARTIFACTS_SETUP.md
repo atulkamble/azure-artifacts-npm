@@ -67,13 +67,32 @@ Update the following placeholders in your files:
 4. Select `azure-pipelines.yml`
 5. Review and run the pipeline
 
-### 5. Pipeline Service Connections (Optional)
+### 5. Pipeline Service Connections (Optional - for npmjs.com publishing)
 
-If you want to publish to npmjs.com as well:
-1. Go to Project Settings → Service Connections
-2. Create new service connection → npm
-3. Name it `npmjs`
-4. Add your npmjs.com credentials
+To enable publishing to npmjs.com in addition to Azure Artifacts:
+
+#### Create npmjs Service Connection:
+1. Go to **Project Settings** → **Service Connections** in Azure DevOps
+2. Click **New service connection**
+3. Select **npm** from the list
+4. Fill in the details:
+   - **Connection name**: `npmjs-connection` (must match pipeline variable)
+   - **Registry URL**: `https://registry.npmjs.org/`
+   - **Username**: Your npmjs username
+   - **Password**: Your npmjs password or access token
+5. Check **Grant access permission to all pipelines**
+6. Click **Save**
+
+#### Enable npmjs Publishing:
+1. In your Azure DevOps pipeline, go to **Variables**
+2. Set `publishToNpmjs` to `true`
+3. Ensure `npmjsServiceConnection` matches your service connection name
+
+#### Alternative: Skip npmjs Publishing
+The pipeline works perfectly without npmjs publishing. The step is conditional and will be skipped if:
+- `publishToNpmjs` variable is `false` (default)
+- The service connection doesn't exist
+- It's a pull request build
 
 ## Manual Publishing (Local Development)
 
