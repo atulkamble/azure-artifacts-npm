@@ -1,4 +1,31 @@
-**basic NPM project code** — 
+# Azure Artifacts NPM Package
+
+A demonstration project showing how to publish npm packages to Azure Artifacts using Azure DevOps pipelines.
+
+## 🚀 Quick Start - Pipeline Options
+
+This project includes **two pipeline options** to avoid service connection issues:
+
+### ✅ Option 1: Simple Pipeline (Recommended)
+- **File**: `azure-pipelines-simple.yml`
+- **Purpose**: Azure Artifacts publishing only
+- **Benefits**: No service connections required, works immediately
+- **Use when**: You only need Azure Artifacts publishing
+
+### ⚙️ Option 2: Full Pipeline (Advanced)
+- **File**: `azure-pipelines.yml`  
+- **Purpose**: Azure Artifacts + optional npmjs publishing
+- **Requirements**: Additional service connection setup for npmjs
+- **Use when**: You need to publish to both Azure Artifacts and npmjs.com
+
+## ⚠️ Troubleshooting Pipeline Issues
+
+If you encounter service connection errors like:
+```
+Step input publishEndpoint references service connection npmjs-connection which could not be found
+```
+
+**Solution**: Use `azure-pipelines-simple.yml` instead - it completely avoids service connection dependencies.
 
 ---
 

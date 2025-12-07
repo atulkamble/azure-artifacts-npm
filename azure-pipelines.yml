@@ -12,9 +12,9 @@ variables:
   registryUrl: 'https://pkgs.dev.azure.com/$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_packaging/$(feedName)/npm/registry/'
   feedName: 'npm-packages'  # Replace with your actual feed name
   
-  # Publishing configuration
-  publishToNpmjs: 'false'  # Set to 'true' to enable publishing to npmjs.com
-  npmjsServiceConnection: 'npmjs-connection'  # Name of your npmjs service connection
+  # Publishing configuration - npmjs publishing is DISABLED by default
+  publishToNpmjs: 'false'  # Keep as 'false' to avoid service connection errors
+  npmjsServiceConnection: 'npmjs-connection'  # Name of your npmjs service connection (if created)
 
 stages:
 - stage: Build
@@ -112,17 +112,26 @@ stages:
               publishFeed: '$(System.TeamProject)/$(feedName)'
             displayName: 'Publish to Azure Artifacts'
 
-          # Optional: Publish to public npm registry (requires service connection setup)
-          # To enable this step:
-          # 1. Go to Project Settings → Service Connections
-          # 2. Create new service connection → npm
-          # 3. Name it 'npmjs-connection'
-          # 4. Add your npmjs.com credentials
-          # 5. Set publishToNpmjs variable to 'true' in your pipeline
-          - task: Npm@1
+          # Optional: Publish to public npm registry
+          # This step is DISABLED by default to prevent service connection errors
+          # To enable: Set publishToNpmjs to 'true' AND create the service connection
+          - task: Bash@3
             inputs:
-              command: 'publish'
-              publishRegistry: 'useExternalRegistry'
-              publishEndpoint: '$(npmjsServiceConnection)'
-            displayName: 'Publish to npmjs.com (Optional)'
-            condition: and(succeeded(), eq(variables['publishToNpmjs'], 'true'), ne(variables['Build.Reason'], 'PullRequest'))
+              targetType: 'inline'
+              script: |
+                echo "ℹ️  npmjs publishing is disabled by default"
+                echo "To enable npmjs publishing:"
+                echo "1. Create service connection named '$(npmjsServiceConnection)'"
+                echo "2. Set publishToNpmjs variable to 'true'"
+                echo "3. Re-run the pipeline"
+            displayName: 'npmjs Publishing Info (Currently Disabled)'
+            condition: and(succeeded(), eq(variables['publishToNpmjs'], 'false'))
+          
+          # Uncomment the section below ONLY after creating the service connection
+          # - task: Npm@1
+          #   inputs:
+          #     command: 'publish'
+          #     publishRegistry: 'useExternalRegistry'
+          #     publishEndpoint: '$(npmjsServiceConnection)'
+          #   displayName: 'Publish to npmjs.com'
+          #   condition: and(succeeded(), eq(variables['publishToNpmjs'], 'true'), ne(variables['Build.Reason'], 'PullRequest'))

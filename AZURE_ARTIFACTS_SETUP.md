@@ -2,6 +2,16 @@
 
 This guide will help you set up Azure Artifacts to publish your npm package.
 
+## 🚀 Quick Start (Recommended)
+
+**For immediate success without service connection issues:**
+1. Use `azure-pipelines-simple.yml` - focuses only on Azure Artifacts
+2. No external service connections required
+3. No npmjs publishing complexity
+
+**For advanced users who need npmjs publishing:**
+- Use `azure-pipelines.yml` with additional setup steps below
+
 ## Prerequisites
 
 1. Azure DevOps Organization
@@ -61,11 +71,16 @@ Update the following placeholders in your files:
 
 ### 4. Set up Azure Pipeline
 
+**RECOMMENDED: Use the Simple Pipeline**
 1. Go to Azure DevOps → Pipelines → Create Pipeline
 2. Select your repository source
 3. Choose "Existing Azure Pipelines YAML file"
-4. Select `azure-pipelines.yml`
+4. Select `azure-pipelines-simple.yml` (Azure Artifacts only - no service connection issues)
 5. Review and run the pipeline
+
+**ALTERNATIVE: Use Full Pipeline (requires additional setup)**
+- Use `azure-pipelines.yml` only if you need npmjs publishing
+- Requires creating service connections (see step 5 below)
 
 ### 5. Pipeline Service Connections (Optional - for npmjs.com publishing)
 
