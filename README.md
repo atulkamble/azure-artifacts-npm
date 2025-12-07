@@ -2,30 +2,42 @@
 
 A demonstration project showing how to publish npm packages to Azure Artifacts using Azure DevOps pipelines.
 
-## 🚀 Quick Start - Pipeline Options
+## 🚀 Pipeline Options - Choose Based on Your Needs
 
-This project includes **two pipeline options** to avoid service connection issues:
+This project provides **three pipeline configurations** to handle different publishing scenarios:
 
-### ✅ Option 1: Simple Pipeline (Recommended)
-- **File**: `azure-pipelines-simple.yml`
+### ✅ Option 1: Main Pipeline (Default & Recommended)
+- **File**: `azure-pipelines.yml`
 - **Purpose**: Azure Artifacts publishing only
-- **Benefits**: No service connections required, works immediately
-- **Use when**: You only need Azure Artifacts publishing
+- **Benefits**: Zero service connections required, works immediately
+- **Use when**: You only need Azure Artifacts (most common scenario)
 
-### ⚙️ Option 2: Full Pipeline (Advanced)
-- **File**: `azure-pipelines.yml`  
-- **Purpose**: Azure Artifacts + optional npmjs publishing
-- **Requirements**: Additional service connection setup for npmjs
-- **Use when**: You need to publish to both Azure Artifacts and npmjs.com
+### 🔄 Option 2: Simple Pipeline (Alternative)  
+- **File**: `azure-pipelines-simple.yml`
+- **Purpose**: Azure Artifacts only (alternative implementation)
+- **Benefits**: Clean, minimal configuration
+- **Use when**: You prefer a more basic pipeline structure
+
+### ⚙️ Option 3: Advanced Pipeline with npmjs Support
+- **File**: `azure-pipelines-npmjs.yml`  
+- **Purpose**: Azure Artifacts + npmjs.com dual publishing
+- **Requirements**: Must create npmjs service connection first
+- **Use when**: You specifically need to publish to both platforms
 
 ## ⚠️ Troubleshooting Pipeline Issues
 
-If you encounter service connection errors like:
+### Service Connection Errors (SOLVED)
+If you previously encountered errors like:
 ```
 Step input publishEndpoint references service connection npmjs-connection which could not be found
 ```
 
-**Solution**: Use `azure-pipelines-simple.yml` instead - it completely avoids service connection dependencies.
+**✅ This is now FIXED**: The main `azure-pipelines.yml` no longer contains any npmjs dependencies.
+
+### Which Pipeline Should I Use?
+- **95% of users**: Use `azure-pipelines.yml` (the default)
+- **Need npmjs too**: Use `azure-pipelines-npmjs.yml` + create service connection
+- **Prefer minimal**: Use `azure-pipelines-simple.yml`
 
 ---
 
