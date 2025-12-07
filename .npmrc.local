@@ -1,0 +1,5 @@
+# Azure Artifacts npm registry configuration - PRODUCTION
+# This file contains the actual configuration for your Azure Artifacts setup
+# DO NOT COMMIT THIS FILE TO VERSION CONTROL
+registry=https://pkgs.dev.azure.com/atul-kamble/newproject/_packaging/npm-packages/npm/registry/
+always-auth=true
