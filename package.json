@@ -1,0 +1,35 @@
+{
+  "name": "@atulkamble/azure-artifacts-npm",
+  "version": "1.0.0",
+  "description": "A basic NPM package demonstrating Azure Artifacts publishing",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "build": "echo \"No build step required for this package\"",
+    "prepublishOnly": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atulkamble/azure-artifacts-npm.git"
+  },
+  "keywords": ["azure", "artifacts", "npm", "lodash", "utility"],
+  "author": "Atul Kamble",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/atulkamble/azure-artifacts-npm/issues"
+  },
+  "homepage": "https://github.com/atulkamble/azure-artifacts-npm#readme",
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "registry": "https://pkgs.dev.azure.com/<YOUR_ORGANIZATION>/<YOUR_PROJECT>/_packaging/<YOUR_FEED_NAME>/npm/registry/"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}

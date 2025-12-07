@@ -1,0 +1,118 @@
+# Azure DevOps Pipeline for NPM Package Publishing to Azure Artifacts
+
+trigger:
+- main
+- develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # Azure Artifacts feed configuration
+  registryUrl: 'https://pkgs.dev.azure.com/$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_packaging/$(feedName)/npm/registry/'
+  feedName: 'npm-packages'  # Replace with your actual feed name
+
+stages:
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+  - job: BuildJob
+    displayName: 'Build NPM Package'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSource: 'spec'
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+
+    - task: Npm@1
+      inputs:
+        command: 'ci'
+      displayName: 'npm ci'
+
+    - task: Npm@1
+      inputs:
+        command: 'custom'
+        customCommand: 'run test'
+      displayName: 'Run tests'
+      continueOnError: true  # Set to false if you have tests
+
+    - task: Npm@1
+      inputs:
+        command: 'custom'
+        customCommand: 'run build'
+      displayName: 'Build package'
+      continueOnError: true  # Set to false if you have a build script
+
+    # Archive the package contents
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+      displayName: 'Archive package'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'npm-package'
+        publishLocation: 'Container'
+      displayName: 'Publish build artifacts'
+
+- stage: Publish
+  displayName: 'Publish to Azure Artifacts'
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: PublishJob
+    displayName: 'Publish NPM Package'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'npm-package'
+              downloadPath: '$(System.ArtifactsDirectory)'
+            displayName: 'Download build artifacts'
+
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: '$(System.ArtifactsDirectory)/npm-package/*.zip'
+              destinationFolder: '$(System.DefaultWorkingDirectory)'
+              cleanDestinationFolder: true
+            displayName: 'Extract package files'
+
+          - task: NodeTool@0
+            inputs:
+              versionSource: 'spec'
+              versionSpec: '18.x'
+            displayName: 'Install Node.js'
+
+          # Configure npm to use Azure Artifacts
+          - task: npmAuthenticate@0
+            inputs:
+              workingFile: '.npmrc'
+            displayName: 'Authenticate with Azure Artifacts'
+
+          # Publish to Azure Artifacts
+          - task: Npm@1
+            inputs:
+              command: 'publish'
+              publishRegistry: 'useFeed'
+              publishFeed: '$(System.TeamProject)/$(feedName)'
+            displayName: 'Publish to Azure Artifacts'
+
+          # Optional: Publish to public npm registry
+          - task: Npm@1
+            inputs:
+              command: 'publish'
+              publishRegistry: 'useExternalRegistry'
+              publishEndpoint: 'npmjs'  # Create this service connection in Azure DevOps
+            displayName: 'Publish to npmjs.com'
+            condition: and(succeeded(), eq(variables['publishToNpmjs'], 'true'))
